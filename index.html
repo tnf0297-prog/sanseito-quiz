@@ -1,0 +1,616 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>参政党 候補者適性チェック</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@400;700&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<style>
+  :root {
+    --primary: #2D2A5E;
+    --accent: #C8392B;
+    --gold: #B8860B;
+    --light: #F7F5EF;
+    --text: #1a1a1a;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Noto Sans JP', sans-serif;
+    background: var(--light);
+    color: var(--text);
+    min-height: 100vh;
+  }
+
+  /* ===== 印刷用QRシート（A4縦） ===== */
+  .qr-sheet {
+    width: 210mm;
+    min-height: 297mm;
+    margin: 0 auto;
+    background: #fff;
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 16mm 14mm;
+  }
+
+  /* 背景装飾 */
+  .qr-sheet::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 6mm;
+    background: var(--primary);
+  }
+  .qr-sheet::after {
+    content: '';
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    height: 6mm;
+    background: var(--primary);
+  }
+
+  .accent-bar {
+    position: absolute;
+    top: 6mm; left: 0; right: 0;
+    height: 2mm;
+    background: var(--accent);
+  }
+  .accent-bar-bottom {
+    position: absolute;
+    bottom: 6mm; left: 0; right: 0;
+    height: 2mm;
+    background: var(--accent);
+  }
+
+  /* ロゴエリア */
+  .logo-area {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    gap: 10mm;
+    margin-bottom: 8mm;
+    padding-bottom: 6mm;
+    border-bottom: 0.5px solid #ccc;
+  }
+
+  .party-mark {
+    width: 18mm;
+    height: 18mm;
+    background: var(--primary);
+    border-radius: 2mm;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+
+  .party-mark svg {
+    width: 12mm;
+    height: 12mm;
+  }
+
+  .logo-text h1 {
+    font-family: 'Noto Serif JP', serif;
+    font-size: 22pt;
+    font-weight: 700;
+    color: var(--primary);
+    letter-spacing: 0.15em;
+    line-height: 1.1;
+  }
+
+  .logo-text p {
+    font-size: 8pt;
+    color: #666;
+    letter-spacing: 0.1em;
+    margin-top: 1mm;
+  }
+
+  /* メインコピー */
+  .main-copy {
+    text-align: center;
+    margin-bottom: 8mm;
+    width: 100%;
+  }
+
+  .main-copy .tagline {
+    font-family: 'Noto Serif JP', serif;
+    font-size: 18pt;
+    font-weight: 700;
+    color: var(--primary);
+    line-height: 1.5;
+    margin-bottom: 3mm;
+  }
+
+  .main-copy .tagline span {
+    color: var(--accent);
+    border-bottom: 2px solid var(--accent);
+    padding-bottom: 1px;
+  }
+
+  .main-copy .sub {
+    font-size: 9pt;
+    color: #444;
+    line-height: 1.8;
+  }
+
+  /* QRコードエリア */
+  .qr-area {
+    display: flex;
+    gap: 10mm;
+    width: 100%;
+    margin-bottom: 8mm;
+    align-items: stretch;
+  }
+
+  .qr-box {
+    flex: 0 0 auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 3mm;
+    padding: 6mm;
+    border: 1px solid #ddd;
+    border-radius: 3mm;
+    background: #fff;
+  }
+
+  .qr-box #qrcode canvas,
+  .qr-box #qrcode img {
+    display: block;
+  }
+
+  .qr-label {
+    font-size: 7.5pt;
+    color: #555;
+    text-align: center;
+    letter-spacing: 0.05em;
+  }
+
+  .qr-url {
+    font-size: 6.5pt;
+    color: #888;
+    text-align: center;
+    word-break: break-all;
+    max-width: 46mm;
+  }
+
+  /* 説明エリア */
+  .desc-area {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 4mm;
+  }
+
+  .step {
+    display: flex;
+    align-items: flex-start;
+    gap: 3mm;
+  }
+
+  .step-num {
+    width: 7mm;
+    height: 7mm;
+    background: var(--primary);
+    color: #fff;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 8pt;
+    font-weight: 700;
+    flex-shrink: 0;
+    margin-top: 0.5mm;
+  }
+
+  .step-text strong {
+    font-size: 9pt;
+    color: var(--primary);
+    display: block;
+    margin-bottom: 0.5mm;
+  }
+
+  .step-text span {
+    font-size: 8pt;
+    color: #555;
+    line-height: 1.6;
+  }
+
+  /* 区切り線 */
+  .divider {
+    width: 100%;
+    height: 0.3mm;
+    background: linear-gradient(to right, var(--primary), var(--accent), var(--primary));
+    margin: 6mm 0;
+    opacity: 0.3;
+  }
+
+  /* 4軸説明 */
+  .axes-section {
+    width: 100%;
+    margin-bottom: 8mm;
+  }
+
+  .axes-section h2 {
+    font-family: 'Noto Serif JP', serif;
+    font-size: 11pt;
+    color: var(--primary);
+    margin-bottom: 4mm;
+    text-align: center;
+    letter-spacing: 0.1em;
+  }
+
+  .axes-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 3mm;
+  }
+
+  .axis-item {
+    padding: 4mm 5mm;
+    border-left: 3px solid var(--primary);
+    background: #f9f8f5;
+  }
+
+  .axis-item:nth-child(2) { border-left-color: #1D9E75; }
+  .axis-item:nth-child(3) { border-left-color: #D85A30; }
+  .axis-item:nth-child(4) { border-left-color: #BA7517; }
+
+  .axis-item strong {
+    font-size: 9pt;
+    display: block;
+    margin-bottom: 1mm;
+    color: var(--text);
+  }
+
+  .axis-item p {
+    font-size: 7.5pt;
+    color: #555;
+    line-height: 1.6;
+  }
+
+  /* メッセージ */
+  .message-box {
+    width: 100%;
+    padding: 6mm 8mm;
+    background: var(--primary);
+    color: #fff;
+    border-radius: 2mm;
+    margin-bottom: 8mm;
+    position: relative;
+  }
+
+  .message-box::before {
+    content: '';
+    position: absolute;
+    left: 0; top: 0; bottom: 0;
+    width: 2mm;
+    background: var(--accent);
+    border-radius: 2mm 0 0 2mm;
+  }
+
+  .message-box p {
+    font-family: 'Noto Serif JP', serif;
+    font-size: 9.5pt;
+    line-height: 1.9;
+    text-align: center;
+    letter-spacing: 0.05em;
+  }
+
+  /* フッター */
+  .footer {
+    width: 100%;
+    text-align: center;
+    margin-top: auto;
+  }
+
+  .footer p {
+    font-size: 7pt;
+    color: #888;
+    line-height: 1.8;
+  }
+
+  /* ===== 画面プレビュー用スタイル ===== */
+  .screen-wrap {
+    padding: 20px;
+    background: #e8e6e0;
+    min-height: 100vh;
+  }
+
+  .screen-header {
+    max-width: 800px;
+    margin: 0 auto 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .screen-header h1 {
+    font-family: 'Noto Serif JP', serif;
+    font-size: 18px;
+    color: var(--primary);
+  }
+
+  .print-btn {
+    padding: 10px 24px;
+    background: var(--primary);
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    font-family: 'Noto Sans JP', sans-serif;
+    font-size: 14px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .print-btn:hover { background: #1a1840; }
+
+  .preview-note {
+    max-width: 800px;
+    margin: 0 auto 16px;
+    padding: 12px 16px;
+    background: #fff3cd;
+    border-radius: 6px;
+    font-size: 13px;
+    color: #856404;
+  }
+
+  /* URL入力パネル */
+  .url-panel {
+    max-width: 800px;
+    margin: 0 auto 16px;
+    background: #fff;
+    border-radius: 10px;
+    padding: 20px 24px;
+    border: 1px solid #ddd;
+  }
+  .url-panel h2 {
+    font-family: 'Noto Serif JP', serif;
+    font-size: 15px;
+    color: var(--primary);
+    margin-bottom: 12px;
+  }
+  .url-panel .step-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 10px;
+    flex-wrap: wrap;
+  }
+  .url-panel label {
+    font-size: 13px;
+    color: #333;
+    white-space: nowrap;
+    font-weight: 500;
+  }
+  .url-panel input[type="text"] {
+    flex: 1;
+    min-width: 200px;
+    padding: 9px 14px;
+    border: 1.5px solid #ccc;
+    border-radius: 6px;
+    font-size: 14px;
+    font-family: monospace;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  .url-panel input[type="text"]:focus {
+    border-color: var(--primary);
+  }
+  .url-panel .apply-btn {
+    padding: 9px 22px;
+    background: var(--primary);
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    font-size: 14px;
+    cursor: pointer;
+    white-space: nowrap;
+    font-family: 'Noto Sans JP', sans-serif;
+  }
+  .url-panel .apply-btn:hover { background: #1a1840; }
+  .url-panel .hint {
+    font-size: 12px;
+    color: #888;
+    margin-top: 6px;
+  }
+  .url-panel .success-msg {
+    font-size: 12px;
+    color: #1D9E75;
+    margin-top: 6px;
+    display: none;
+    font-weight: 500;
+  }
+
+  /* 印刷時 */
+  @media print {
+    .screen-header, .preview-note, .screen-wrap, .url-panel { display: none !important; }
+    body { background: #fff; }
+    .qr-sheet {
+      width: 100%;
+      min-height: 100vh;
+      margin: 0;
+      box-shadow: none;
+    }
+  }
+</style>
+</head>
+<body>
+
+<div class="screen-wrap">
+  <div class="screen-header">
+    <h1>参政党 QRコード配布チラシ — 印刷プレビュー</h1>
+    <button class="print-btn" onclick="window.print()">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor"><path d="M2.5 8a.5.5 0 1 0 0-1 .5.5 0 0 0 0 1"/><path d="M5 1a2 2 0 0 0-2 2v2H2a2 2 0 0 0-2 2v3a2 2 0 0 0 2 2h1v1a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2v-1h1a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-1V3a2 2 0 0 0-2-2zM4 3a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v2H4zm1 5a2 2 0 0 0-2 2v1H2a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h12a1 1 0 0 1 1 1v3a1 1 0 0 1-1 1h-1v-1a2 2 0 0 0-2-2zm7 2v3a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1v-3a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1"/></svg>
+      印刷する
+    </button>
+  </div>
+  <div class="preview-note">
+    ※ このページをA4縦・余白なし（または最小）で印刷してください。下のフォームにアンケートURLを入力するとQRコードが自動で更新されます。
+  </div>
+
+  <div class="url-panel">
+    <h2>QRコードのURLを設定する</h2>
+    <div class="step-row">
+      <label>アンケートURL：</label>
+      <input type="text" id="url-input" placeholder="https://あなたのユーザー名.github.io/sanseito-quiz/" />
+      <button class="apply-btn" onclick="updateQR()">QRコードを更新</button>
+    </div>
+    <div class="hint">GitHub PagesなどでアンケートHTMLを公開した後、そのURLをここに貼り付けて「更新」ボタンを押してください。その後「印刷する」ボタンで印刷できます。</div>
+    <div class="success-msg" id="success-msg">✓ QRコードを更新しました。右上の「印刷する」ボタンで印刷できます。</div>
+  </div>
+
+  <!-- ===== 印刷対象チラシ ===== -->
+  <div class="qr-sheet">
+    <div class="accent-bar"></div>
+    <div class="accent-bar-bottom"></div>
+
+    <!-- ロゴ -->
+    <div class="logo-area">
+      <div class="party-mark">
+        <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="24" cy="24" r="20" stroke="white" stroke-width="2.5"/>
+          <path d="M24 8 L24 40 M14 16 L34 16 M12 24 L36 24 M14 32 L34 32" stroke="white" stroke-width="2" stroke-linecap="round"/>
+        </svg>
+      </div>
+      <div class="logo-text">
+        <h1>参政党</h1>
+        <p>SANSEITO — 国民が主役の政治へ</p>
+      </div>
+    </div>
+
+    <!-- メインコピー -->
+    <div class="main-copy">
+      <div class="tagline">
+        あなたの中に、<span>政治家の素質</span>があるかもしれません。<br>
+        3分で分かる、候補者適性チェック
+      </div>
+      <div class="sub">
+        参政党は「しがらみのない、真に日本を良くしたい人」を求めています。<br>
+        特別な経験や肩書きは必要ありません。問題意識と行動力があれば、それがすべての出発点です。
+      </div>
+    </div>
+
+    <div class="divider"></div>
+
+    <!-- QR + ステップ -->
+    <div class="qr-area">
+      <div class="qr-box">
+        <div id="qrcode"></div>
+        <div class="qr-label">スマートフォンで<br>読み取ってください</div>
+        <div class="qr-url">アンケートURL<br>（ご自身のURLに変更）</div>
+      </div>
+
+      <div class="desc-area">
+        <div class="step">
+          <div class="step-num">1</div>
+          <div class="step-text">
+            <strong>QRコードをスキャン</strong>
+            <span>スマートフォンのカメラで読み取るとアンケートが開きます</span>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num">2</div>
+          <div class="step-text">
+            <strong>8つの質問に答える（約3分）</strong>
+            <span>日頃の問題意識・行動力・価値観について選ぶだけで完了</span>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num">3</div>
+          <div class="step-text">
+            <strong>適性スコアを確認</strong>
+            <span>4つの軸で分析した結果と、次のステップをご案内します</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="divider"></div>
+
+    <!-- 4軸 -->
+    <div class="axes-section">
+      <h2>— チェックする4つの軸 —</h2>
+      <div class="axes-grid">
+        <div class="axis-item">
+          <strong>問題意識</strong>
+          <p>日本・地域の課題をどれだけ深く感じ、情報収集しているか</p>
+        </div>
+        <div class="axis-item">
+          <strong>行動力</strong>
+          <p>社会や地域のために、実際に動いてきた経験と意欲があるか</p>
+        </div>
+        <div class="axis-item">
+          <strong>人間力</strong>
+          <p>人に信頼され、共感を生み出す人間としての資質があるか</p>
+        </div>
+        <div class="axis-item">
+          <strong>覚悟</strong>
+          <p>政治活動に向き合う時間・精神的な準備ができているか</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- メッセージ -->
+    <div class="message-box">
+      <p>
+        「立候補なんて自分には無理」と思っている方へ。<br>
+        参政党の候補者の多くは、最初はそう思っていた普通の市民です。<br>
+        まずは、あなたの可能性を一緒に確かめてみませんか。
+      </p>
+    </div>
+
+    <!-- フッター -->
+    <div class="footer">
+      <p>
+        本アンケートへのご回答は任意です。回答結果は参政党の候補者発掘活動にのみ使用します。<br>
+        ご不明な点はお近くのスタッフまでお声がけください。<br>
+        参政党 ／ sanseito.jp
+      </p>
+    </div>
+  </div>
+</div>
+
+<script>
+  const defaultUrl = "https://sanseito.jp/";
+  let qrInstance = null;
+
+  function buildQR(url) {
+    const el = document.getElementById("qrcode");
+    el.innerHTML = "";
+    qrInstance = new QRCode(el, {
+      text: url || defaultUrl,
+      width: 160,
+      height: 160,
+      colorDark: "#2D2A5E",
+      colorLight: "#ffffff",
+      correctLevel: QRCode.CorrectLevel.H
+    });
+    // チラシ内のURL表示も更新
+    const urlDisplay = document.getElementById("qr-url-display");
+    if (urlDisplay) urlDisplay.textContent = url || defaultUrl;
+  }
+
+  function updateQR() {
+    const input = document.getElementById("url-input");
+    const val = input.value.trim();
+    if (!val) { alert("URLを入力してください"); return; }
+    buildQR(val);
+    const msg = document.getElementById("success-msg");
+    msg.style.display = "block";
+    setTimeout(() => { msg.style.display = "none"; }, 4000);
+  }
+
+  // 初期表示
+  buildQR(defaultUrl);
+</script>
+</body>
+</html>
