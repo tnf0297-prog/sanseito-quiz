@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>参政党 候補者適性チェック</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: -apple-system, 'Hiragino Sans', 'Noto Sans JP', sans-serif; background: #F7F5EF; color: #1a1a1a; min-height: 100vh; }
+.wrap { max-width: 600px; margin: 0 auto; padding: 1.5rem 1rem 3rem; }
+
+/* ヘッダー */
+.header { text-align: center; margin-bottom: 2rem; padding-bottom: 1.5rem; border-bottom: 1px solid #ddd; }
+.header h1 { font-size: 13px; font-weight: 500; color: #2D2A5E; letter-spacing: 0.15em; margin-bottom: 4px; }
+.header p { font-size: 20px; font-weight: 700; color: #1a1a1a; }
+
+/* プログレスバー */
+.progress-bar { height: 4px; background: #e0ddd5; border-radius: 2px; margin-bottom: 2rem; }
+.progress-fill { height: 100%; background: #2D2A5E; border-radius: 2px; transition: width 0.4s ease; }
+.section-label { font-size: 11px; font-weight: 700; color: #2D2A5E; letter-spacing: 0.1em; margin-bottom: 6px; }
+.q-text { font-size: 17px; font-weight: 600; line-height: 1.6; margin-bottom: 1.5rem; color: #1a1a1a; }
+
+/* 選択肢 */
+.options { display: flex; flex-direction: column; gap: 10px; }
+.opt { display: flex; align-items: flex-start; gap: 12px; padding: 14px 16px; border: 1.5px solid #ddd; border-radius: 12px; cursor: pointer; background: #fff; transition: border-color 0.15s, background 0.15s; -webkit-tap-highlight-color: transparent; }
+.opt:active { background: #f0effa; }
+.opt.selected { border-color: #2D2A5E; background: #EEEDFE; }
+.opt-icon { width: 34px; height: 34px; border-radius: 50%; background: #f0efea; display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 16px; }
+.opt.selected .opt-icon { background: #CECBF6; }
+.opt-label { font-size: 14px; font-weight: 500; color: #1a1a1a; line-height: 1.5; margin-bottom: 2px; }
+.opt-sub { font-size: 12px; color: #777; line-height: 1.5; }
+
+/* ナビ */
+.nav { display: flex; justify-content: space-between; align-items: center; margin-top: 2rem; }
+.nav-btn { padding: 11px 24px; border-radius: 8px; font-size: 14px; font-weight: 500; cursor: pointer; border: 1.5px solid #ccc; background: #fff; color: #333; }
+.nav-btn.primary { background: #2D2A5E; color: #fff; border-color: #2D2A5E; }
+.nav-btn:disabled { opacity: 0.3; cursor: default; }
+.q-counter { font-size: 13px; color: #888; }
+
+/* 結果 */
+.result-header { text-align: center; margin-bottom: 2rem; }
+.score-ring { width: 130px; height: 130px; margin: 0 auto 1rem; position: relative; }
+.score-ring svg { transform: rotate(-90deg); }
+.score-num { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 28px; font-weight: 700; color: #1a1a1a; }
+.result-title { font-size: 20px; font-weight: 700; margin-bottom: 10px; color: #2D2A5E; }
+.result-sub { font-size: 14px; color: #444; line-height: 1.8; }
+.axes { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 1.5rem 0; }
+.axis-card { padding: 14px; border: 1px solid #e0ddd5; border-radius: 10px; background: #fff; }
+.axis-name { font-size: 12px; color: #777; margin-bottom: 6px; }
+.axis-bar-bg { height: 6px; background: #e0ddd5; border-radius: 3px; overflow: hidden; }
+.axis-bar-fill { height: 6px; border-radius: 3px; }
+.axis-pct { font-size: 13px; font-weight: 700; margin-top: 4px; }
+.cta-box { padding: 20px; background: #EEEDFE; border-radius: 12px; border: 1px solid #AFA9EC; margin-top: 1.5rem; text-align: center; }
+.cta-box p { font-size: 14px; color: #2D2A5E; line-height: 1.8; margin-bottom: 12px; }
+.cta-btn { padding: 12px 28px; background: #2D2A5E; color: #fff; border: none; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; }
+.restart-btn { display: block; margin: 1.5rem auto 0; font-size: 13px; color: #888; background: none; border: none; cursor: pointer; text-decoration: underline; }
+</style>
+</head>
+<body>
+<div class="wrap" id="app"></div>
+
+<script>
+const questions = [
+  { section: "問題意識", text: "日本社会で最も深刻だと感じる課題はどれですか？", axis: "awareness",
+    options: [
+      { icon: "🏫", label: "教育・子育て環境の悪化", sub: "少子化・学力低下・子供の貧困など", score: 3 },
+      { icon: "🌾", label: "食料・エネルギーの自給率低下", sub: "海外依存リスク・農業衰退など", score: 3 },
+      { icon: "💉", label: "医療・福祉の持続可能性", sub: "高齢化・医療費増大・地域医療崩壊など", score: 3 },
+      { icon: "🏛️", label: "政治・行政の機能不全", sub: "官僚主義・利権・情報公開の欠如など", score: 3 },
+    ]
+  },
+  { section: "問題意識", text: "その課題について、日常的にどのくらい情報収集していますか？", axis: "awareness",
+    options: [
+      { icon: "📚", label: "毎日意識して調べている", sub: "書籍・ニュース・専門家の意見など複数ソース", score: 4 },
+      { icon: "📰", label: "週に数回チェックしている", sub: "SNSやニュースサイトを定期確認", score: 3 },
+      { icon: "🔔", label: "気になったときに調べる", sub: "話題になった時に深掘りする", score: 2 },
+      { icon: "💡", label: "まだこれから学びたい", sub: "関心はあるが情報収集は始めたばかり", score: 1 },
+    ]
+  },
+  { section: "行動力", text: "地域や社会のために、これまで実際に行動したことはありますか？", axis: "action",
+    options: [
+      { icon: "🤝", label: "地域活動・NPO・ボランティアに参加", sub: "継続的に関わってきた", score: 4 },
+      { icon: "✍️", label: "署名・陳情・意見書の提出など", sub: "市民としての声を届けた経験あり", score: 3 },
+      { icon: "💬", label: "SNSや周囲への情報発信", sub: "問題提起や啓発活動をしてきた", score: 2 },
+      { icon: "🌱", label: "まだ行動には至っていない", sub: "関心はあるが一歩踏み出せていない", score: 1 },
+    ]
+  },
+  { section: "行動力", text: "「地方議員候補として考えてみませんか」と声をかけられたら？", axis: "action",
+    options: [
+      { icon: "🙋", label: "ぜひ話を聞きたい、前向きに検討する", sub: "", score: 4 },
+      { icon: "🤔", label: "不安はあるが興味はある", sub: "家族や仕事の状況次第では", score: 3 },
+      { icon: "📖", label: "まず勉強してから判断したい", sub: "政策・活動内容をもっと知りたい", score: 2 },
+      { icon: "🚶", label: "自分には向いていないと思う", sub: "サポーターとして関わりたい", score: 1 },
+    ]
+  },
+  { section: "人間力", text: "周囲の人たちからよく言われることは？", axis: "character",
+    options: [
+      { icon: "🧭", label: "「筋が通っている」「信念がある」", sub: "困難でも自分の考えを曲げない", score: 4 },
+      { icon: "👂", label: "「話をよく聞いてくれる」「頼れる」", sub: "人の悩みに真剣に向き合う", score: 4 },
+      { icon: "💪", label: "「行動力がある」「率先してやる」", sub: "やると決めたことは最後までやる", score: 3 },
+      { icon: "🌟", label: "「明るい」「場をまとめる」", sub: "コミュニティのまとめ役になることが多い", score: 3 },
+    ]
+  },
+  { section: "人間力", text: "政治家として自分が最も持っている資質は？", axis: "character",
+    options: [
+      { icon: "📣", label: "伝える力・表現力", sub: "考えをわかりやすく伝えられる", score: 3 },
+      { icon: "🔍", label: "調査力・論理的思考", sub: "課題を深く分析・整理できる", score: 3 },
+      { icon: "🤲", label: "共感力・傾聴力", sub: "人の痛みや悩みを理解できる", score: 3 },
+      { icon: "🛡️", label: "忍耐力・信念の強さ", sub: "逆境でも揺るがない心の強さ", score: 3 },
+    ]
+  },
+  { section: "覚悟", text: "政治活動に伴う時間・体力・精神的負担について、あなたの状況は？", axis: "readiness",
+    options: [
+      { icon: "✅", label: "本気で取り組む時間と覚悟がある", sub: "家族の理解も得られている", score: 4 },
+      { icon: "⚖️", label: "仕事と両立できる範囲でなら", sub: "週末や夜間の活動なら可能", score: 3 },
+      { icon: "🏗️", label: "今はまだ難しいが将来的には", sub: "数年後に環境が整えば考えたい", score: 2 },
+      { icon: "🙏", label: "支援・応援する立場で関わりたい", sub: "直接の候補者より裏方向き", score: 1 },
+    ]
+  },
+  { section: "覚悟", text: "参政党の理念（食・教育・医療を守る、しがらみのない政治）についてどう感じますか？", axis: "readiness",
+    options: [
+      { icon: "🔥", label: "強く共感・自分も同じ思いがある", sub: "だからこそここにいる", score: 4 },
+      { icon: "👍", label: "基本的に賛成・応援したい", sub: "大切な方向性だと思う", score: 3 },
+      { icon: "🧐", label: "もっと詳しく知ってから判断したい", sub: "まだ理解が浅い部分がある", score: 2 },
+      { icon: "🤷", label: "理念より具体的な政策で判断する", sub: "理念だけでは判断しにくい", score: 1 },
+    ]
+  },
+];
+
+const axisNames = { awareness: "問題意識", action: "行動力", character: "人間力", readiness: "覚悟" };
+const axisColors = { awareness: "#2D2A5E", action: "#1D9E75", character: "#D85A30", readiness: "#BA7517" };
+
+let current = 0;
+let answers = new Array(questions.length).fill(null);
+
+function render() {
+  const q = questions[current];
+  const pct = Math.round((current / questions.length) * 100);
+
+  const optsHTML = q.options.map((o, i) => {
+    const sel = answers[current] === i ? " selected" : "";
+    return `<div class="opt${sel}" data-idx="${i}">
+      <div class="opt-icon">${o.icon}</div>
+      <div>
+        <div class="opt-label">${o.label}</div>
+        ${o.sub ? `<div class="opt-sub">${o.sub}</div>` : ""}
+      </div>
+    </div>`;
+  }).join("");
+
+  document.getElementById("app").innerHTML = `
+    <div class="header">
+      <h1>参政党</h1>
+      <p>候補者適性チェック</p>
+    </div>
+    <div class="progress-bar"><div class="progress-fill" style="width:${pct}%"></div></div>
+    <div class="section-label">${q.section}</div>
+    <div class="q-text">${q.text}</div>
+    <div class="options" id="opts">${optsHTML}</div>
+    <div class="nav">
+      <button class="nav-btn" id="btn-back" ${current === 0 ? "disabled" : ""}>← 戻る</button>
+      <span class="q-counter">${current + 1} / ${questions.length}</span>
+      <button class="nav-btn primary" id="btn-next" ${answers[current] === null ? "disabled" : ""}>${current === questions.length - 1 ? "結果を見る" : "次へ →"}</button>
+    </div>`;
+
+  document.getElementById("opts").addEventListener("click", function(e) {
+    const opt = e.target.closest(".opt");
+    if (!opt) return;
+    answers[current] = parseInt(opt.dataset.idx, 10);
+    render();
+  });
+
+  document.getElementById("btn-next").addEventListener("click", function() {
+    if (answers[current] === null) return;
+    if (current < questions.length - 1) { current++; render(); }
+    else showResult();
+  });
+
+  document.getElementById("btn-back").addEventListener("click", function() {
+    if (current > 0) { current--; render(); }
+  });
+}
+
+function showResult() {
+  const axes = { awareness: 0, action: 0, character: 0, readiness: 0 };
+  const axisMax = { awareness: 0, action: 0, character: 0, readiness: 0 };
+
+  questions.forEach((q, i) => {
+    if (answers[i] !== null) {
+      axes[q.axis] += q.options[answers[i]].score;
+      axisMax[q.axis] += 4;
+    }
+  });
+
+  const totalScore = Object.values(axes).reduce((a, b) => a + b, 0);
+  const totalMax = Object.values(axisMax).reduce((a, b) => a + b, 0);
+  const pct = Math.round((totalScore / totalMax) * 100);
+
+  let title, sub, cta;
+  if (pct >= 80) {
+    title = "高い候補者適性があります";
+    sub = "問題意識・行動力・人間力・覚悟のすべてにおいて優れた資質が見られます。候補者養成プログラムへのご参加を、ぜひ前向きにご検討ください。";
+    cta = true;
+  } else if (pct >= 60) {
+    title = "候補者として十分な可能性があります";
+    sub = "強い問題意識と人間力をお持ちです。まずは勉強会・ボランティア活動への参加を通じて、一緒に歩んでみませんか。";
+    cta = true;
+  } else if (pct >= 40) {
+    title = "サポーターとして頼りになる存在です";
+    sub = "候補者を支える活動から始めることで、自然と次のステップが見えてきます。焦らず、ご自身のペースで関わり方を探してください。";
+    cta = false;
+  } else {
+    title = "仲間として一緒に歩みましょう";
+    sub = "まずは集会や勉強会に参加し、理念や活動をもっと知ることから始めてみてください。";
+    cta = false;
+  }
+
+  const circumference = 2 * Math.PI * 52;
+  const dashOffset = circumference * (1 - pct / 100);
+
+  const axisHTML = Object.entries(axes).map(([key, val]) => {
+    const p = Math.round((val / axisMax[key]) * 100);
+    return `<div class="axis-card">
+      <div class="axis-name">${axisNames[key]}</div>
+      <div class="axis-bar-bg"><div class="axis-bar-fill" style="width:${p}%;background:${axisColors[key]}"></div></div>
+      <div class="axis-pct" style="color:${axisColors[key]}">${p}%</div>
+    </div>`;
+  }).join("");
+
+  document.getElementById("app").innerHTML = `
+    <div class="header">
+      <h1>参政党</h1>
+      <p>候補者適性チェック — 結果</p>
+    </div>
+    <div class="result-header">
+      <div class="score-ring">
+        <svg width="130" height="130" viewBox="0 0 130 130">
+          <circle cx="65" cy="65" r="52" fill="none" stroke="#e0ddd5" stroke-width="9"/>
+          <circle cx="65" cy="65" r="52" fill="none" stroke="#2D2A5E" stroke-width="9"
+            stroke-dasharray="${circumference.toFixed(1)}" stroke-dashoffset="${dashOffset.toFixed(1)}" stroke-linecap="round"/>
+        </svg>
+        <div class="score-num">${pct}%</div>
+      </div>
+      <div class="result-title">${title}</div>
+      <div class="result-sub">${sub}</div>
+    </div>
+    <div class="axes">${axisHTML}</div>
+    ${cta ? `<div class="cta-box">
+      <p>候補者養成講座・個別面談のご案内を<br>受け取りますか？</p>
+      <button class="cta-btn" onclick="alert('担当スタッフにお声がけください。')">詳しく聞く</button>
+    </div>` : ""}
+    <button class="restart-btn" onclick="restart()">もう一度やり直す</button>`;
+}
+
+function restart() {
+  current = 0;
+  answers = new Array(questions.length).fill(null);
+  render();
+}
+
+render();
+</script>
+</body>
+</html>
