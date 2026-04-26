@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>参政党 候補者適性チェック</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@400;700&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'Noto Sans JP', sans-serif; background: #F4F2EC; color: #1a1a1a; min-height: 100vh; }
+.wrap { max-width: 600px; margin: 0 auto; padding: 1.5rem 1rem 4rem; }
+.header { text-align: center; margin-bottom: 2rem; padding-bottom: 1.5rem; border-bottom: 1px solid #ddd; }
+.header h1 { font-family: 'Noto Serif JP', serif; font-size: 22px; font-weight: 700; color: #2D2A5E; letter-spacing: 0.2em; margin-bottom: 4px; }
+.header p { font-size: 12px; color: #888; letter-spacing: 0.15em; }
+.progress-bar { height: 3px; background: #ddd; border-radius: 2px; margin-bottom: 2rem; }
+.progress-fill { height: 100%; background: #2D2A5E; border-radius: 2px; transition: width 0.4s ease; }
+.section-label { font-size: 11px; font-weight: 700; color: #2D2A5E; letter-spacing: 0.12em; margin-bottom: 6px; text-transform: uppercase; }
+.q-text { font-family: 'Noto Serif JP', serif; font-size: 17px; font-weight: 700; line-height: 1.7; margin-bottom: 1.5rem; color: #1a1a1a; }
+.options { display: flex; flex-direction: column; gap: 10px; }
+.opt { display: flex; align-items: flex-start; gap: 12px; padding: 14px 16px; border: 1.5px solid #ddd; border-radius: 10px; cursor: pointer; background: #fff; transition: all 0.15s; -webkit-tap-highlight-color: transparent; user-select: none; }
+.opt.selected { border-color: #2D2A5E; background: #EEEDFE; }
+.opt-icon { width: 34px; height: 34px; border-radius: 50%; background: #f0efe8; display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 16px; }
+.opt.selected .opt-icon { background: #CECBF6; }
+.opt-label { font-size: 14px; font-weight: 500; line-height: 1.5; margin-bottom: 2px; }
+.opt-sub { font-size: 12px; color: #888; line-height: 1.5; }
+.free-section { margin-top: 1.5rem; }
+.free-label { font-size: 12px; font-weight: 700; color: #2D2A5E; letter-spacing: 0.1em; margin-bottom: 6px; }
+.free-desc { font-size: 12px; color: #666; margin-bottom: 8px; line-height: 1.7; background: #fff; padding: 10px 12px; border-radius: 8px; border-left: 3px solid #2D2A5E; }
+.free-textarea { width: 100%; padding: 12px 14px; border: 1.5px solid #ddd; border-radius: 10px; font-size: 14px; font-family: 'Noto Sans JP', sans-serif; line-height: 1.7; resize: vertical; min-height: 110px; background: #fff; outline: none; transition: border-color 0.2s; }
+.free-textarea:focus { border-color: #2D2A5E; }
+.char-count { font-size: 11px; color: #bbb; text-align: right; margin-top: 4px; }
+.char-count.ok { color: #1D9E75; font-weight: 700; }
+.nav { display: flex; justify-content: space-between; align-items: center; margin-top: 2rem; }
+.nav-btn { padding: 11px 24px; border-radius: 8px; font-size: 14px; font-weight: 500; cursor: pointer; border: 1.5px solid #ccc; background: #fff; color: #333; font-family: 'Noto Sans JP', sans-serif; }
+.nav-btn.primary { background: #2D2A5E; color: #fff; border-color: #2D2A5E; }
+.nav-btn:disabled { opacity: 0.3; cursor: default; }
+.q-counter { font-size: 12px; color: #aaa; }
+.contact-section { background: #fff; border-radius: 12px; padding: 20px; margin-bottom: 1.5rem; border: 1px solid #e8e5df; }
+.contact-section h3 { font-family: 'Noto Serif JP', serif; font-size: 16px; margin-bottom: 6px; color: #2D2A5E; }
+.contact-section p { font-size: 13px; color: #888; margin-bottom: 16px; line-height: 1.6; }
+.form-row { margin-bottom: 12px; }
+.form-label { font-size: 12px; font-weight: 700; color: #555; margin-bottom: 5px; display: block; }
+.form-input { width: 100%; padding: 10px 14px; border: 1.5px solid #ddd; border-radius: 8px; font-size: 14px; font-family: 'Noto Sans JP', sans-serif; outline: none; transition: border-color 0.2s; }
+.form-input:focus { border-color: #2D2A5E; }
+.analyzing { text-align: center; padding: 3rem 1rem; }
+.analyzing-spinner { width: 48px; height: 48px; border: 3px solid #e8e5df; border-top-color: #2D2A5E; border-radius: 50%; animation: spin 0.9s linear infinite; margin: 0 auto 1.5rem; }
+@keyframes spin { to { transform: rotate(360deg); } }
+.analyzing h3 { font-family: 'Noto Serif JP', serif; font-size: 18px; color: #2D2A5E; margin-bottom: 8px; }
+.analyzing p { font-size: 13px; color: #888; line-height: 1.8; }
+.result-header { text-align: center; margin-bottom: 2rem; }
+.score-ring { width: 130px; height: 130px; margin: 0 auto 1rem; position: relative; }
+.score-ring svg { transform: rotate(-90deg); }
+.score-num { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 26px; font-weight: 700; color: #1a1a1a; }
+.result-title { font-family: 'Noto Serif JP', serif; font-size: 20px; font-weight: 700; margin-bottom: 10px; color: #2D2A5E; }
+.result-sub { font-size: 14px; color: #555; line-height: 1.8; }
+.axes { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 1.5rem 0; }
+.axis-card { padding: 14px; border: 1px solid #e8e5df; border-radius: 10px; background: #fff; }
+.axis-name { font-size: 11px; color: #aaa; margin-bottom: 6px; letter-spacing: 0.05em; }
+.axis-bar-bg { height: 5px; background: #e8e5df; border-radius: 3px; overflow: hidden; }
+.axis-bar-fill { height: 5px; border-radius: 3px; }
+.axis-pct { font-size: 14px; font-weight: 700; margin-top: 4px; }
+.ai-analysis { background: #fff; border-radius: 12px; padding: 20px; margin: 1.5rem 0; border: 1px solid #e8e5df; }
+.ai-analysis h3 { font-family: 'Noto Serif JP', serif; font-size: 15px; color: #2D2A5E; margin-bottom: 14px; display: flex; align-items: center; gap: 8px; }
+.ai-badge { font-size: 10px; background: #2D2A5E; color: #fff; padding: 2px 8px; border-radius: 20px; letter-spacing: 0.05em; font-family: 'Noto Sans JP', sans-serif; font-weight: 500; }
+.ai-score-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px; }
+.ai-score-label { font-size: 13px; color: #555; }
+.ai-score-val { font-size: 16px; font-weight: 700; color: #2D2A5E; }
+.score-bar { height: 7px; background: #e8e5df; border-radius: 4px; overflow: hidden; margin-bottom: 14px; }
+.score-bar-fill { height: 7px; border-radius: 4px; background: #2D2A5E; }
+.ai-comment { font-size: 13px; color: #444; line-height: 1.9; padding: 14px; background: #F4F2EC; border-radius: 8px; white-space: pre-wrap; }
+.concern-box { margin-top: 10px; padding: 12px 14px; background: #fff8f0; border-radius: 8px; border-left: 3px solid #BA7517; font-size: 13px; color: #7a4a00; line-height: 1.7; }
+.cta-box { padding: 20px; background: #EEEDFE; border-radius: 12px; border: 1px solid #AFA9EC; margin-top: 1.5rem; text-align: center; }
+.cta-box p { font-size: 14px; color: #2D2A5E; line-height: 1.8; margin-bottom: 12px; }
+.cta-btn { padding: 12px 28px; background: #2D2A5E; color: #fff; border: none; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; font-family: 'Noto Sans JP', sans-serif; }
+.restart-btn { display: block; margin: 1.5rem auto 0; font-size: 13px; color: #aaa; background: none; border: none; cursor: pointer; text-decoration: underline; font-family: 'Noto Sans JP', sans-serif; }
+.error-box { background: #fff0f0; border: 1px solid #ffcccc; border-radius: 10px; padding: 16px; margin-top: 1rem; font-size: 13px; color: #c00; line-height: 1.7; }
+</style>
+</head>
+<body>
+<div class="wrap" id="app"></div>
+<script>
+const questions = [
+  { section: "問題意識", axis: "awareness", requireFree: true,
+    text: "日本社会で最も深刻だと感じる課題はどれですか？",
+    freePrompt: "その課題について、具体的にどんな問題だと考えていますか？ご自身の言葉でお書きください。（100文字以上）",
+    options: [
+      { icon: "🏫", label: "教育・子育て環境の悪化", sub: "少子化・学力低下・子供の貧困など", score: 3 },
+      { icon: "🌾", label: "食料・エネルギーの自給率低下", sub: "海外依存リスク・農業衰退など", score: 3 },
+      { icon: "💉", label: "医療・福祉の持続可能性", sub: "高齢化・医療費増大・地域医療崩壊など", score: 3 },
+      { icon: "🏛️", label: "政治・行政の機能不全", sub: "官僚主義・利権・情報公開の欠如など", score: 3 },
+    ]
+  },
+  { section: "問題意識", axis: "awareness", requireFree: false,
+    text: "その課題について、日常的にどのくらい情報収集していますか？",
+    options: [
+      { icon: "📚", label: "毎日意識して調べている", sub: "書籍・ニュース・専門家の意見など複数ソース", score: 4 },
+      { icon: "📰", label: "週に数回チェックしている", sub: "SNSやニュースサイトを定期確認", score: 3 },
+      { icon: "🔔", label: "気になったときに調べる", sub: "話題になった時に深掘りする", score: 2 },
+      { icon: "💡", label: "まだこれから学びたい", sub: "関心はあるが情報収集は始めたばかり", score: 1 },
+    ]
+  },
+  { section: "行動力", axis: "action", requireFree: true,
+    text: "地域や社会のために、これまで実際に行動したことはありますか？",
+    freePrompt: "具体的にどのような行動をしましたか？経験がない場合は「なぜ行動できなかったか」をお書きください。（100文字以上）",
+    options: [
+      { icon: "🤝", label: "地域活動・NPO・ボランティアに参加", sub: "継続的に関わってきた", score: 4 },
+      { icon: "✍️", label: "署名・陳情・意見書の提出など", sub: "市民としての声を届けた経験あり", score: 3 },
+      { icon: "💬", label: "SNSや周囲への情報発信", sub: "問題提起や啓発活動をしてきた", score: 2 },
+      { icon: "🌱", label: "まだ行動には至っていない", sub: "関心はあるが一歩踏み出せていない", score: 1 },
+    ]
+  },
+  { section: "行動力", axis: "action", requireFree: false,
+    text: "「地方議員候補として考えてみませんか」と声をかけられたら？",
+    options: [
+      { icon: "🙋", label: "ぜひ話を聞きたい、前向きに検討する", sub: "", score: 4 },
+      { icon: "🤔", label: "不安はあるが興味はある", sub: "家族や仕事の状況次第では", score: 3 },
+      { icon: "📖", label: "まず勉強してから判断したい", sub: "政策・活動内容をもっと知りたい", score: 2 },
+      { icon: "🚶", label: "自分には向いていないと思う", sub: "サポーターとして関わりたい", score: 1 },
+    ]
+  },
+  { section: "人間力", axis: "character", requireFree: false,
+    text: "周囲の人たちからよく言われることは？",
+    options: [
+      { icon: "🧭", label: "「筋が通っている」「信念がある」", sub: "困難でも自分の考えを曲げない", score: 4 },
+      { icon: "👂", label: "「話をよく聞いてくれる」「頼れる」", sub: "人の悩みに真剣に向き合う", score: 4 },
+      { icon: "💪", label: "「行動力がある」「率先してやる」", sub: "やると決めたことは最後までやる", score: 3 },
+      { icon: "🌟", label: "「明るい」「場をまとめる」", sub: "コミュニティのまとめ役になることが多い", score: 3 },
+    ]
+  },
+  { section: "人間力", axis: "character", requireFree: true,
+    text: "政治家として自分が最も持っている資質は？",
+    freePrompt: "その資質が実際に発揮された具体的なエピソードをお書きください。（100文字以上）",
+    options: [
+      { icon: "📣", label: "伝える力・表現力", sub: "考えをわかりやすく伝えられる", score: 3 },
+      { icon: "🔍", label: "調査力・論理的思考", sub: "課題を深く分析・整理できる", score: 3 },
+      { icon: "🤲", label: "共感力・傾聴力", sub: "人の痛みや悩みを理解できる", score: 3 },
+      { icon: "🛡️", label: "忍耐力・信念の強さ", sub: "逆境でも揺るがない心の強さ", score: 3 },
+    ]
+  },
+  { section: "覚悟", axis: "readiness", requireFree: false,
+    text: "政治活動に伴う時間・体力・精神的負担について、あなたの状況は？",
+    options: [
+      { icon: "✅", label: "本気で取り組む時間と覚悟がある", sub: "家族の理解も得られている", score: 4 },
+      { icon: "⚖️", label: "仕事と両立できる範囲でなら", sub: "週末や夜間の活動なら可能", score: 3 },
+      { icon: "🏗️", label: "今はまだ難しいが将来的には", sub: "数年後に環境が整えば考えたい", score: 2 },
+      { icon: "🙏", label: "支援・応援する立場で関わりたい", sub: "直接の候補者より裏方向き", score: 1 },
+    ]
+  },
+  { section: "覚悟", axis: "readiness", requireFree: true,
+    text: "参政党の理念（食・教育・医療を守る、しがらみのない政治）についてどう感じますか？",
+    freePrompt: "この理念のどの部分に共感しますか？またその理由をご自身の言葉でお書きください。（100文字以上）",
+    options: [
+      { icon: "🔥", label: "強く共感・自分も同じ思いがある", sub: "だからこそここにいる", score: 4 },
+      { icon: "👍", label: "基本的に賛成・応援したい", sub: "大切な方向性だと思う", score: 3 },
+      { icon: "🧐", label: "もっと詳しく知ってから判断したい", sub: "まだ理解が浅い部分がある", score: 2 },
+      { icon: "🤷", label: "理念より具体的な政策で判断する", sub: "理念だけでは判断しにくい", score: 1 },
+    ]
+  },
+];
+
+const axisNames = { awareness: "問題意識", action: "行動力", character: "人間力", readiness: "覚悟" };
+const axisColors = { awareness: "#2D2A5E", action: "#1D9E75", character: "#D85A30", readiness: "#BA7517" };
+const MIN_CHARS = 100;
+
+let current = 0;
+let answers = new Array(questions.length).fill(null);
+let freeTexts = new Array(questions.length).fill("");
+let contactInfo = { name: "", phone: "", email: "" };
+
+function canProceed() {
+  if (answers[current] === null) return false;
+  if (questions[current].requireFree && freeTexts[current].length < MIN_CHARS) return false;
+  return true;
+}
+
+function render() {
+  const q = questions[current];
+  const pct = Math.round((current / questions.length) * 100);
+
+  const optsHTML = q.options.map((o, i) => {
+    const sel = answers[current] === i ? " selected" : "";
+    return `<div class="opt${sel}" data-idx="${i}">
+      <div class="opt-icon">${o.icon}</div>
+      <div><div class="opt-label">${o.label}</div>${o.sub ? `<div class="opt-sub">${o.sub}</div>` : ""}</div>
+    </div>`;
+  }).join("");
+
+  const charLen = freeTexts[current].length;
+  const freeHTML = q.requireFree ? `
+    <div class="free-section">
+      <div class="free-label">自由記述（必須）</div>
+      <div class="free-desc">${q.freePrompt}</div>
+      <textarea class="free-textarea" id="free-input" placeholder="こちらにご記入ください...">${freeTexts[current]}</textarea>
+      <div class="char-count ${charLen >= MIN_CHARS ? 'ok' : ''}" id="char-count">${charLen} / ${MIN_CHARS}文字以上</div>
+    </div>` : "";
+
+  document.getElementById("app").innerHTML = `
+    <div class="header"><h1>参政党</h1><p>候補者適性チェック</p></div>
+    <div class="progress-bar"><div class="progress-fill" style="width:${pct}%"></div></div>
+    <div class="section-label">${q.section}</div>
+    <div class="q-text">${q.text}</div>
+    <div class="options" id="opts">${optsHTML}</div>
+    ${freeHTML}
+    <div class="nav">
+      <button class="nav-btn" id="btn-back" ${current === 0 ? "disabled" : ""}>← 戻る</button>
+      <span class="q-counter">${current + 1} / ${questions.length}</span>
+      <button class="nav-btn primary" id="btn-next" ${canProceed() ? "" : "disabled"}>${current === questions.length - 1 ? "次へ →" : "次へ →"}</button>
+    </div>`;
+
+  document.getElementById("opts").addEventListener("click", function(e) {
+    const opt = e.target.closest(".opt");
+    if (!opt) return;
+    answers[current] = parseInt(opt.dataset.idx, 10);
+    document.querySelectorAll(".opt").forEach(el => el.classList.remove("selected"));
+    opt.classList.add("selected");
+    document.getElementById("btn-next").disabled = !canProceed();
+  });
+
+  if (q.requireFree) {
+    document.getElementById("free-input").addEventListener("input", function() {
+      freeTexts[current] = this.value;
+      const cc = document.getElementById("char-count");
+      cc.textContent = `${this.value.length} / ${MIN_CHARS}文字以上`;
+      cc.className = "char-count" + (this.value.length >= MIN_CHARS ? " ok" : "");
+      document.getElementById("btn-next").disabled = !canProceed();
+    });
+  }
+
+  document.getElementById("btn-next").addEventListener("click", function() {
+    if (!canProceed()) return;
+    if (current < questions.length - 1) { current++; render(); }
+    else runAnalysis();
+  });
+
+  document.getElementById("btn-back").addEventListener("click", function() {
+    if (current > 0) { current--; render(); }
+  });
+}
+
+
+
+async function runAnalysis() {
+  document.getElementById("app").innerHTML = `
+    <div class="header"><h1>参政党</h1><p>候補者適性チェック</p></div>
+    <div class="analyzing">
+      <div class="analyzing-spinner"></div>
+      <h3>AI分析中...</h3>
+      <p>選択回答と自由記述の整合性を<br>分析しています。しばらくお待ちください。</p>
+    </div>`;
+
+  const axes = { awareness: 0, action: 0, character: 0, readiness: 0 };
+  const axisMax = { awareness: 0, action: 0, character: 0, readiness: 0 };
+  questions.forEach((q, i) => {
+    if (answers[i] !== null) {
+      axes[q.axis] += q.options[answers[i]].score;
+      axisMax[q.axis] += 4;
+    }
+  });
+  const totalScore = Object.values(axes).reduce((a,b)=>a+b,0);
+  const totalMax = Object.values(axisMax).reduce((a,b)=>a+b,0);
+  const totalPct = Math.round((totalScore/totalMax)*100);
+
+  const qaList = questions.map((q, i) => {
+    const sel = answers[i] !== null ? q.options[answers[i]].label : "未回答";
+    const free = q.requireFree && freeTexts[i] ? `\n  自由記述：「${freeTexts[i]}」` : "";
+    return `Q${i+1}【${q.section}】${q.text}\n  選択：${sel}${free}`;
+  }).join("\n\n");
+
+  const prompt = `あなたは参政党の候補者審査担当AIです。以下のアンケート回答を分析してください。
+
+【回答者】（名前は結果確認後に収集）
+
+【回答内容】
+${qaList}
+
+【選択式スコア】総合${totalPct}点（問題意識${Math.round(axes.awareness/axisMax.awareness*100)}点、行動力${Math.round(axes.action/axisMax.action*100)}点、人間力${Math.round(axes.character/axisMax.character*100)}点、覚悟${Math.round(axes.readiness/axisMax.readiness*100)}点）
+
+以下の観点で分析し、JSON形式のみで回答してください（前後に余計な文字は不要）：
+1. 選択回答と自由記述の整合性（0〜100点）
+2. 自由記述の具体性・誠実さ（0〜100点）
+3. 総合的な候補者適性コメント（200字程度、日本語）
+4. 懸念点（日本語、なければ空文字）
+
+{"consistency":数値,"sincerity":数値,"comment":"文字列","concern":"文字列"}`;
+
+  try {
+    const API_KEY = window._apiKey || "";
+    if (!API_KEY) { showResult(totalPct, axes, axisMax, null, new Error("APIキー未設定")); return; }
+    const response = await fetch("https://api.anthropic.com/v1/messages", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "x-api-key": API_KEY,
+        "anthropic-version": "2023-06-01",
+        "anthropic-dangerous-direct-browser-access": "true"
+      },
+      body: JSON.stringify({
+        model: "claude-sonnet-4-20250514",
+        max_tokens: 1000,
+        messages: [{ role: "user", content: prompt }]
+      })
+    });
+    const data = await response.json();
+    const text = data.content.map(c => c.text || "").join("");
+    const clean = text.replace(/```json|```/g, "").trim();
+    const ai = JSON.parse(clean);
+    showResult(totalPct, axes, axisMax, ai, null);
+  } catch(err) {
+    showResult(totalPct, axes, axisMax, null, err);
+  }
+}
+
+function showResult(totalPct, axes, axisMax, ai, err) {
+  let title, sub, cta;
+  if (totalPct >= 80) { title = "高い候補者適性があります"; sub = "問題意識・行動力・人間力・覚悟のすべてにおいて優れた資質が見られます。"; cta = true; }
+  else if (totalPct >= 60) { title = "候補者として十分な可能性があります"; sub = "強い問題意識と人間力をお持ちです。まずは勉強会への参加から始めてみませんか。"; cta = true; }
+  else if (totalPct >= 40) { title = "サポーターとして頼りになる存在です"; sub = "候補者を支える活動から始めることで、次のステップが見えてきます。"; cta = false; }
+  else { title = "仲間として一緒に歩みましょう"; sub = "まずは集会や勉強会に参加し、理念や活動をもっと知ることから始めてください。"; cta = false; }
+
+  const circumference = 2 * Math.PI * 52;
+  const dashOffset = circumference * (1 - totalPct / 100);
+
+  const axisHTML = Object.entries(axes).map(([key, val]) => {
+    const p = Math.round((val / axisMax[key]) * 100);
+    return `<div class="axis-card">
+      <div class="axis-name">${axisNames[key]}</div>
+      <div class="axis-bar-bg"><div class="axis-bar-fill" style="width:${p}%;background:${axisColors[key]}"></div></div>
+      <div class="axis-pct" style="color:${axisColors[key]}">${p}%</div>
+    </div>`;
+  }).join("");
+
+  const aiHTML = ai ? `
+    <div class="ai-analysis">
+      <h3>AI分析レポート <span class="ai-badge">AI</span></h3>
+      <div class="ai-score-row"><span class="ai-score-label">回答の一貫性</span><span class="ai-score-val">${ai.consistency}点</span></div>
+      <div class="score-bar"><div class="score-bar-fill" style="width:${ai.consistency}%"></div></div>
+      <div class="ai-score-row"><span class="ai-score-label">誠実さ・具体性</span><span class="ai-score-val">${ai.sincerity}点</span></div>
+      <div class="score-bar"><div class="score-bar-fill" style="width:${ai.sincerity}%"></div></div>
+      <div class="ai-comment">${ai.comment}</div>
+      ${ai.concern ? `<div class="concern-box">⚠️ ${ai.concern}</div>` : ""}
+    </div>` : err ? `<div class="error-box">AI分析の取得に失敗しました。選択式スコアのみ表示しています。</div>` : "";
+
+  document.getElementById("app").innerHTML = `
+    <div class="header"><h1>参政党</h1><p>候補者適性チェック — 結果</p></div>
+    <div class="result-header">
+      <div class="score-ring">
+        <svg width="130" height="130" viewBox="0 0 130 130">
+          <circle cx="65" cy="65" r="52" fill="none" stroke="#e8e5df" stroke-width="9"/>
+          <circle cx="65" cy="65" r="52" fill="none" stroke="#2D2A5E" stroke-width="9"
+            stroke-dasharray="${circumference.toFixed(1)}" stroke-dashoffset="${dashOffset.toFixed(1)}" stroke-linecap="round"/>
+        </svg>
+        <div class="score-num">${totalPct}%</div>
+      </div>
+      <div class="result-title">${title}</div>
+      <div class="result-sub">${sub}</div>
+    </div>
+    <div class="axes">${axisHTML}</div>
+    ${aiHTML}
+    <div class="contact-section" id="contact-form">
+      <h3>ご連絡先のご入力（任意）</h3>
+      <p>担当者からのご連絡を希望される方はご入力ください。<br>入力いただいた情報は参政党の候補者発掘活動にのみ使用し、外部には提供しません。</p>
+      <div class="form-row">
+        <label class="form-label">お名前</label>
+        <input class="form-input" id="inp-name" type="text" placeholder="山田 太郎" value="${contactInfo.name}">
+      </div>
+      <div class="form-row">
+        <label class="form-label">電話番号</label>
+        <input class="form-input" id="inp-phone" type="tel" placeholder="090-0000-0000" value="${contactInfo.phone}">
+      </div>
+      <div class="form-row">
+        <label class="form-label">メールアドレス</label>
+        <input class="form-input" id="inp-email" type="email" placeholder="example@email.com" value="${contactInfo.email}">
+      </div>
+      <button class="cta-btn" style="width:100%;margin-top:8px" onclick="submitContact()">担当者に連絡を希望する</button>
+      <div id="contact-sent" style="display:none;margin-top:12px;text-align:center;font-size:13px;color:#1D9E75;font-weight:700">✓ 送信しました。担当者よりご連絡いたします。</div>
+    </div>
+    <button class="restart-btn" onclick="restart()">もう一度やり直す</button>`;
+}
+
+function submitContact() {
+  const name = document.getElementById("inp-name").value.trim();
+  const phone = document.getElementById("inp-phone").value.trim();
+  const email = document.getElementById("inp-email").value.trim();
+  if (!name && !phone && !email) { alert("少なくとも1つご入力ください"); return; }
+  contactInfo = { name, phone, email };
+  document.getElementById("contact-sent").style.display = "block";
+  document.getElementById("inp-name").disabled = true;
+  document.getElementById("inp-phone").disabled = true;
+  document.getElementById("inp-email").disabled = true;
+}
+
+function restart() {
+  current = 0;
+  answers = new Array(questions.length).fill(null);
+  freeTexts = new Array(questions.length).fill("");
+  contactInfo = { name: "", phone: "", email: "" };
+  render();
+}
+
+function showApiKeySetup() {
+  document.getElementById("app").innerHTML = `
+    <div class="header"><h1>参政党</h1><p>候補者適性チェック — スタッフ設定</p></div>
+    <div class="contact-section">
+      <h3>APIキーの設定</h3>
+      <p>アンケートを開始する前に、担当スタッフがAPIキーを入力してください。<br>この画面は参加者には見せないでください。</p>
+      <div class="form-row">
+        <label class="form-label">Anthropic APIキー</label>
+        <input class="form-input" id="apikey-input" type="password" placeholder="sk-ant-...">
+      </div>
+      <div style="font-size:12px;color:#888;margin-top:6px;line-height:1.7">
+        ※ このキーはこの端末のメモリにのみ保存されます。外部には送信されません。
+      </div>
+    </div>
+    <div class="nav">
+      <span></span>
+      <span></span>
+      <button class="nav-btn primary" id="btn-start">アンケートを開始する →</button>
+    </div>`;
+
+  document.getElementById("btn-start").addEventListener("click", function() {
+    const key = document.getElementById("apikey-input").value.trim();
+    if (!key || !key.startsWith("sk-ant-")) {
+      alert("正しいAPIキーを入力してください（sk-ant-で始まる文字列）");
+      return;
+    }
+    window._apiKey = key;
+    render();
+  });
+}
+
+showApiKeySetup();
+</script>
+</body>
+</html>
